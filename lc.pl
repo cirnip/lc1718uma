@@ -8,14 +8,91 @@ Trabalho de avaliação
 
 */
 
-/* código escrito com base no que foi lido nas sugestões do enunciado */
+membro(X, [X | _]).
+membro(X, [_ | C]):-membro(X, C).
+
+elimina(X,[],[]).
+elimina(X,[X|L],L1):- elimina(X,L,L1).
+elimina(X,[Y|L],[Y|L1]):- not(Y=X), elimina(X,L,L1).
 
 :-op(100, fy, 'neg').
 :-op(200, xfy, 'e').
 :-op(300, xfy, 'ou').
 :-op(400, xfy, 'imp').
 
-simb_prop(X) :- not(X = neg Y), not(X = Y e Z), not(X = Y ou Z).
+simb_prop(X):-not(X=neg Y),not(X=Y e Z),not(X=Y ou Z).
 
-literal(X) :- simb_prop(X).
-literal(neg X) :- simb_prop(X).
+literal(X):-simb_prop(X).
+literal(neg X):-simb_prop(X).
+
+disj(X):-literal(X).
+disj(X ou Y):-disj(X),disj(Y).
+
+fnc(X):-disj(X).
+fnc(X e Y):-fnc(X),fnc(Y).
+
+
+converte_imp_aux(L,C):-membro(S,L), membro(X imp Y,S), elimina(S,L,L1), elimina(X imp Y, S, S1),
+                    converte_imp_aux([[neg X,Y|S1]|L1],C).
+
+converte_imp_aux(L,C):-membro(S,L), membro(neg(X imp Y),S), elimina(S,L,L1), elimina(neg(X imp Y), S, S1),
+                    converte_imp_aux([[X|S1],[neg Y|S1]|L1],C).
+
+converte_imp_aux(L,L).
+
+converte_imp(L):- converte_imp_aux(L,C), write('A fórmula representada pela lista de listas introduzida é equivalente à fórmula que é representada pela seguinte lista de listas de fórmulas:'), nl, write(C).
+
+%EX1 - projecto%
+
+converte_aux(L,C):-membro(S,L),membro(neg neg X,S), elimina(S,L,L1),elimina(neg neg X,S,S1),
+       converte_aux([[X|S1]|L1],C).
+converte_aux(L,C):-membro(S,L),membro(X ou Y,S),elimina(S,L,L1), elimina(X ou Y,S,S1),
+      converte_aux([[X,Y|S1]|L1],C).
+converte_aux(L,C):-membro(S,L),membro(neg(X ou Y),S),elimina(S,L,L1),elimina(neg(X ou Y),S,S1),
+      converte_aux([[neg X|S1],[neg Y|S1]|L1],C).
+converte_aux(L,C):-membro(S,L),membro(X e Y,S),elimina(S,L,L1),elimina(X e Y,S,S1),     converte_aux([[X|S1],[Y|S1]|L1],C).
+converte_aux(L,C):-membro(S,L),membro(neg(X e Y),S),elimina(S,L,L1),elimina(neg(X e Y),S,S1),
+      converte_aux([[neg X,neg Y|S1]|L1],C).
+converte_aux(L,C):-membro(S,L), membro(X imp Y,S), elimina(S,L,L1), elimina(X imp Y, S, S1),
+                    converte_aux([[neg X,Y|S1]|L1],C).
+
+converte_aux(L,C):-membro(S,L), membro(neg(X imp Y),S), elimina(S,L,L1), elimina(neg(X imp Y), S, S1),
+                    converte_aux([[X|S1],[neg Y|S1]|L1],C).
+converte_aux(L,L).
+
+converte(L):-converte_aux(L,C),nl,write(C).
+
+
+%ex 2 do projecto%
+elimina_rep_novo([[X],[X]],[[]]).
+elimina_rep_novo([[X|L],[X|S]],C):-membro([X],[L|S]),elimina_rep_novo([L|S],C).
+elimina_rep_novo([[X|L]],C):-not(membro([X],[L])),elimina_rep_novo([L],C).
+elimina_rep_novo(L,L).
+elimina_rep([X|L],Z):- membro(X,L),elimina_rep(L,Z).
+elimina_rep([X|L],[X|Z]):- not(membro(X,L)),elimina_rep(L,Z).
+
+
+concatena([], B, B).
+concatena([X|A], B, [X|L]):-concatena(A, B, L).
+
+converte_neg_aux(L,C):-membro(S,L),membro(neg X,S),elimina(S,L,L1),elimina(neg X,S,S1),converte_aux([[neg neg X|S1]|L1],C).
+converte_neg_aux(L,C):-membro(S,L),membro(X e Y,S),elimina(S,L,L1),elimina(X e Y,S,S1),converte_aux([[neg(X e Y)|S1]|L1],C).
+converte_neg_aux(L,C):-membro(S,L),membro(neg(X e Y),S),elimina(S,L,L1),elimina(neg(X e Y),S,S1),converte_aux([[neg(neg(X e Y))|S1]|L1],C).
+converte_neg_aux(L,C):-membro(S,L),membro(X ou Y,S),elimina(S,L,L1),elimina(X ou Y,S,S1),converte_aux([[neg(X ou Y)|S1]|L1],C).
+converte_neg_aux(L,C):-membro(S,L),membro(neg(X ou Y),S),elimina(S,L,L1),elimina(neg(X ou Y),S,S1),converte_aux([[neg(neg(X ou Y))|S1]|L1],C).
+converte_neg_aux(L,C):-membro(S,L),membro(X imp Y,S),elimina(S,L,L1),elimina(X imp Y,S,S1),converte_aux([[neg(X imp Y)|S1]|L1],C).
+converte_neg_aux(L,C):-membro(S,L),membro(neg(X imp Y),S),elimina(S,L,L1),elimina(neg(X imp Y),S,S1),converte_aux([[neg(neg(X imp Y))|S1]|L1],C).
+
+converte_neg(L):-converte_neg_aux(L,C),nl,write(C).
+
+
+res_aux(L,C):-membro([X|S1],L),membro([neg X|S2],L),concatena(S1,S2,S3),elimina([X|S1],L,L1),elimina([neg X|S2],L1,L2),append([S3],L2,L3),res_aux(L3,C).
+res_aux(L,L).
+
+
+res(L):-res_aux(L,C),nl,write(C).
+
+ref_aux(L,[[]]):-res_aux(L,[[]]),nl,write('é refutavel').
+ref_aux(L,S):-res_aux(L,S),nl,write('não é refutavel').
+
+ref(L):-ref_aux(L,_),res(L).
