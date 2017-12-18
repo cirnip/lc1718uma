@@ -87,6 +87,8 @@ converte(L):-converte_aux(L,C),nl,write(C).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Exercício 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Não sei qual é o input que é suposto dar ao predicado ref/1 %
+
 elimina_rep_novo([[X],[X]],[[]]).
 elimina_rep_novo([[X|L],[X|S]],C):-membro([X],[L|S]),elimina_rep_novo([L|S],C).
 elimina_rep_novo([[X|L]],C):-not(membro([X],[L])),elimina_rep_novo([L],C).
