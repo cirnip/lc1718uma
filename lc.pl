@@ -63,6 +63,9 @@ converte_imp(L):- converte_imp_aux(L,C), write('A fórmula representada pela lis
 
 /* Nao sei. Dado um input do tipo "p ou q" ou "p imp q" devolve o mesmo input no output e um "true". */
 
+/* Exemplo de input: converte([[(p e (q ou r)) imp s]].
+* Exemplo de output: [[neg q,neg p, s],[neg p, neg r, s]] */
+
 converte_aux(L,C):- membro(S,L), membro(neg neg X,S), elimina(S,L,L1), elimina(neg neg X,S,S1), converte_aux([[X|S1]|L1],C).
 converte_aux(L,C):- membro(S,L), membro(X ou Y,S), elimina(S,L,L1), elimina(X ou Y,S,S1), converte_aux([[X,Y|S1]|L1],C).
 converte_aux(L,C):- membro(S,L), membro(neg(X ou Y),S), elimina(S,L,L1), elimina(neg(X ou Y),S,S1), converte_aux([[neg X|S1],[neg Y|S1]|L1],C).
