@@ -61,16 +61,27 @@ converte_imp(L):- converte_imp_aux(L,C), write('A fórmula representada pela lis
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Exercicio 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/* Nao sei. Dado um input do tipo "p ou q" ou "p imp q" devolve o mesmo input no output e um "true". */
-
-/* Exemplo de input: converte([[(p e (q ou r)) imp s]].
+/* Exemplo de input: converte([[(p e (q ou r)) imp s]]).
 * Exemplo de output: [[neg q,neg p, s],[neg p, neg r, s]] */
 
+% NOTA: O output dado é diferente do que está acima (o output está errado) %
+
+%%% dupla-negação %%%
+
 converte_aux(L,C):- membro(S,L), membro(neg neg X,S), elimina(S,L,L1), elimina(neg neg X,S,S1), converte_aux([[X|S1]|L1],C).
+
+%%% OR e NOT OR %%%
+
 converte_aux(L,C):- membro(S,L), membro(X ou Y,S), elimina(S,L,L1), elimina(X ou Y,S,S1), converte_aux([[X,Y|S1]|L1],C).
 converte_aux(L,C):- membro(S,L), membro(neg(X ou Y),S), elimina(S,L,L1), elimina(neg(X ou Y),S,S1), converte_aux([[neg X|S1],[neg Y|S1]|L1],C).
+
+%%% AND e NOT AND %%%
+
 converte_aux(L,C):- membro(S,L), membro(X e Y,S), elimina(S,L,L1), elimina(X e Y,S,S1), converte_aux([[X|S1],[Y|S1]|L1],C).
 converte_aux(L,C):- membro(S,L), membro(neg(X e Y),S), elimina(S,L,L1), elimina(neg(X e Y),S,S1), converte_aux([[neg X,neg Y|S1]|L1],C).
+
+%%% IMP e NOT IMP %%%
+
 converte_aux(L,C):- membro(S,L), membro(X imp Y,S), elimina(S,L,L1), elimina(X imp Y, S, S1), converte_aux([[neg X,Y|S1]|L1],C).
 converte_aux(L,C):- membro(S,L), membro(neg(X imp Y),S), elimina(S,L,L1), elimina(neg(X imp Y), S, S1), converte_aux([[X|S1],[neg Y|S1]|L1],C).
 
@@ -94,11 +105,22 @@ elimina_rep([X|L],[X|Z]):- not(membro(X,L)), elimina_rep(L,Z).
 concatena([], B, B).
 concatena([X|A], B, [X|L]):-concatena(A, B, L).
 
+%%% NOT %%%
+
 converte_neg_aux(L,C):- membro(S,L), membro(neg X,S), elimina(S,L,L1), elimina(neg X,S,S1), converte_aux([[neg neg X|S1]|L1],C).
+
+%%% AND e NOT AND %%%
+
 converte_neg_aux(L,C):- membro(S,L), membro(X e Y,S), elimina(S,L,L1), elimina(X e Y,S,S1), converte_aux([[neg(X e Y)|S1]|L1],C).
 converte_neg_aux(L,C):- membro(S,L), membro(neg(X e Y),S), elimina(S,L,L1), elimina(neg(X e Y),S,S1), converte_aux([[neg(neg(X e Y))|S1]|L1],C).
+
+%%% OR e NOT OR %%%
+
 converte_neg_aux(L,C):- membro(S,L), membro(X ou Y,S), elimina(S,L,L1), elimina(X ou Y,S,S1), converte_aux([[neg(X ou Y)|S1]|L1],C).
 converte_neg_aux(L,C):- membro(S,L), membro(neg(X ou Y),S), elimina(S,L,L1), elimina(neg(X ou Y),S,S1), converte_aux([[neg(neg(X ou Y))|S1]|L1],C).
+
+%%% IMP e NOT IMP %%%
+
 converte_neg_aux(L,C):- membro(S,L), membro(X imp Y,S), elimina(S,L,L1), elimina(X imp Y,S,S1), converte_aux([[neg(X imp Y)|S1]|L1],C).
 converte_neg_aux(L,C):- membro(S,L), membro(neg(X imp Y),S), elimina(S,L,L1), elimina(neg(X imp Y),S,S1), converte_aux([[neg(neg(X imp Y))|S1]|L1],C).
 
